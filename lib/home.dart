@@ -1,5 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -8,9 +10,16 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> {
   final DatabaseReference = FirebaseDatabase.instance.reference();
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
+  // Variable for Realtime Database
   final textSending = TextEditingController();
   final textReceiving = TextEditingController();
+
+  // Variable for Authentification
+  final name_auth = TextEditingController();
+  final email_auth = TextEditingController();
+  final password_auth = TextEditingController();
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +71,7 @@ class HomeState extends State<Home> {
                             border: OutlineInputBorder(),
                             hintText: 'Name',
                           ),
+                          controller: name_auth,
                         ),
                       ),
                       Container(
@@ -72,6 +82,7 @@ class HomeState extends State<Home> {
                             border: OutlineInputBorder(),
                             hintText: 'Email',
                           ),
+                          controller: email_auth,
                         ),
                       ),
                       Container(
@@ -82,11 +93,14 @@ class HomeState extends State<Home> {
                             border: OutlineInputBorder(),
                             hintText: 'Password',
                           ),
+                          controller: password_auth,
                         ),
                       ),
                       Container(
                         child: RaisedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            //sign_up();
+                          },
                           child: Text(
                             'Sign up',
                             style: TextStyle(color: Colors.white),
@@ -188,4 +202,17 @@ class HomeState extends State<Home> {
       },
     );
   }
+
+  /*
+  void sign_up() {
+    try {
+      FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email_auth.text,
+        password: password_auth.text,
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+  */
 }

@@ -24,9 +24,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  firebase_database: 1.0.3
-    # Add the dependency for the Firebase Core Flutter SDK
   firebase_core: any
+  firebase_database: 1.0.3
+  firebase_auth: any
+    # Add the dependency for the Firebase Core Flutter SDK
+  #firebase_auth: ^0.8.0
 
   # Add the dependencies for the Firebase products you want to use in your app
   # For example, to use Firebase Authentication and Cloud Firestore
