@@ -1,7 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -10,7 +10,7 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> {
   final DatabaseReference = FirebaseDatabase.instance.reference();
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  //final FirebaseAuth auth = FirebaseAuth.instance;
 
   // Variable for Realtime Database
   final textSending = TextEditingController();
