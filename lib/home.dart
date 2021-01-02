@@ -18,15 +18,15 @@ class HomeState extends State<Home> {
 
   // Variable for create account
   final name_creation = TextEditingController();
-  final email_creation = TextEditingController();
-  final password_creation = TextEditingController();
+  String _email, _password;
 
   // Variable for Authentification
   final email_auth = TextEditingController();
   final password_auth = TextEditingController();
 
-  String status_creation;
-  String status_authentification;
+  String status_creation, status_authentification;
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,6 +35,7 @@ class HomeState extends State<Home> {
         backgroundColor: Colors.blue[900],
       ),
       body: Container(
+        //color: Colors.red[100], // debug
         padding: EdgeInsets.only(
           top: 30,
           bottom: 100,
@@ -47,6 +48,7 @@ class HomeState extends State<Home> {
             children: [
               /********** Creation de compte **********/
               Container(
+                color: Colors.cyan[100], // debug
                 child: Text(
                   'Création de compte',
                   style: TextStyle(
@@ -67,61 +69,32 @@ class HomeState extends State<Home> {
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Container(
+                child: Form(
+                  key: _formKey,
                   child: Column(
-                    children: [
-                      Container(
-                        //color: Colors.red[100], // debug
-                        padding: EdgeInsets.all(10),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Name',
-                          ),
-                          controller: name_creation,
-                        ),
+                    children: <Widget>[
+                      TextFormField(
+                        validator: (input) {
+                          if (input.isEmpty) {
+                            return 'Provide an email';
+                          }
+                        },
+                        decoration: InputDecoration(labelText: 'Email'),
+                        onSaved: (input) => _email = input,
                       ),
-                      Container(
-                        //color: Colors.blue[100], // debug
-                        padding: EdgeInsets.all(10),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Email',
-                          ),
-                          controller: email_creation,
-                        ),
+                      TextFormField(
+                        validator: (input) {
+                          if (input.length < 6) {
+                            return 'Longer password please';
+                          }
+                        },
+                        decoration: InputDecoration(labelText: 'Password'),
+                        onSaved: (input) => _password = input,
+                        obscureText: true,
                       ),
-                      Container(
-                        //color: Colors.green[100], // debug
-                        padding: EdgeInsets.all(10),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Password',
-                          ),
-                          controller: password_creation,
-                        ),
-                      ),
-                      Container(
-                        child: Center(
-                          child: Text('status : $status_creation'),
-                        ),
-                      ),
-                      Container(
-                        child: RaisedButton(
-                          onPressed: () {
-                            sign_up();
-                          },
-                          child: Text(
-                            'Sign up',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          color: Colors.blue[900],
-                        ),
-                        alignment: Alignment.center,
-                        //color: Colors.red[100],
-                        padding: EdgeInsets.only(bottom: 10, top: 10),
+                      RaisedButton(
+                        onPressed: signUp,
+                        child: Text('Sign up'),
                       ),
                     ],
                   ),
@@ -155,7 +128,7 @@ class HomeState extends State<Home> {
                       Container(
                         //color: Colors.blue[100], // debug
                         padding: EdgeInsets.all(10),
-                        child: TextField(
+                        child: TextFormField(
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             hintText: 'Email',
@@ -166,17 +139,12 @@ class HomeState extends State<Home> {
                       Container(
                         //color: Colors.green[100], // debug
                         padding: EdgeInsets.all(10),
-                        child: TextField(
+                        child: TextFormField(
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             hintText: 'Password',
                           ),
                           controller: password_auth,
-                        ),
-                      ),
-                      Container(
-                        child: Center(
-                          child: Text('status : $status_authentification'),
                         ),
                       ),
                       Container(
@@ -224,7 +192,7 @@ class HomeState extends State<Home> {
                     Container(
                       //color: Colors.blue[100], // debug
                       padding: EdgeInsets.all(10),
-                      child: TextField(
+                      child: TextFormField(
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Text sending',
@@ -235,7 +203,7 @@ class HomeState extends State<Home> {
                     Container(
                       //color: Colors.blue[100], // debug
                       padding: EdgeInsets.all(10),
-                      child: TextField(
+                      child: TextFormField(
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Received text',
@@ -286,40 +254,83 @@ class HomeState extends State<Home> {
     );
   }
 
-  void sign_up() {
-    try {
-      FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email_creation.text,
-        password: password_creation.text,
-      );
-      print('==> Account created');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
+  void signUp() async {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _email,
+          password: _password,
+        );
+      } catch (e) {
+        print(e.message);
       }
-    } catch (e) {
-      print(e);
     }
   }
 
-  void sign_in() {
-    try {
-      FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email_auth.text,
-        password: password_auth.text,
-      );
-      status_authentification = 'Account Signed in successfully';
-      print('==> Account Signed in successfully');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        status_authentification = e.code;
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        status_authentification = e.code;
-        print('Wrong password provided for that user.');
+  void sign_in() async {
+    print('sign in button pressed');
+  }
+}
+
+/*
+class SignUpPage extends StatefulWidget {
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String _email, _password;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(),
+      body: Form(
+        key: _formKey,
+        child: Column(
+          children: <Widget>[
+            TextFormField(
+              validator: (input) {
+                if (input.isEmpty) {
+                  return 'Provide an email';
+                }
+              },
+              decoration: InputDecoration(labelText: 'Email'),
+              onSaved: (input) => _email = input,
+            ),
+            TextFormField(
+              validator: (input) {
+                if (input.length < 6) {
+                  return 'Longer password please';
+                }
+              },
+              decoration: InputDecoration(labelText: 'Password'),
+              onSaved: (input) => _password = input,
+              obscureText: true,
+            ),
+            RaisedButton(
+              onPressed: signUp,
+              child: Text('Sign up'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void signUp() async {
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      try {
+        await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: _email, password: _password);
+        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+      } catch (e) {
+        print(e.message);
       }
     }
   }
 }
+*/
